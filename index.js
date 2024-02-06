@@ -49,8 +49,6 @@ app.get("/users", authenticateToken, async (req, res) => {
 
 
 app.post("/users", async (req, res) => {
-  const token = generateAccessToken({ username: req.body.name });
-  console.log(token)
 
   const { id, name, address, password, email } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10)
@@ -85,7 +83,7 @@ app.post("/login", async (req, res) => {
           const match = await bcrypt.compare(password, results[0].password);
           console.log(match);
           if (match) {
-            res.json({ message: 'logged in' });
+            res.json({ message: 'logged in',token:token });
           }else{
             res.json({message:'invalid credential'})
           }
@@ -97,7 +95,7 @@ app.post("/login", async (req, res) => {
     });
 });
 
-app.patch("/users/:id", async (req, res) => {
+app.patch("/users/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { name, address } = req.body;
   connection.query(
@@ -113,7 +111,7 @@ app.patch("/users/:id", async (req, res) => {
 });
 
 
-app.delete("/users/:id", async (req, res) => {
+app.delete("/users/:id",authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { name, address } = req.body;
   connection.query(
